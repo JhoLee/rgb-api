@@ -8,14 +8,15 @@ class Rgb:
     def __init__(self, original: list = [], unit: int = 2, avoid=[]):
         self.__unit = unit
         self.__original = original
-        self.__original_length = len(original)
-        self.__fake_length = (self.__unit - self.__original_length % self.__unit) % self.__unit
+        self.__material = self.__original
+        self.__material_length = len(original)
+        self.__fake_length = (self.__unit - self.__material_length % self.__unit) % self.__unit
         self.__fake_member = []
         for i in range(self.__fake_length):
             self.__fake_member.append(self.random_string(5))
         for member in self.__fake_member:
-            self.__original.append(member)
-        self.__assigned = self.assign(len(self.__original))
+            self.__material.append(member)
+        self.__assigned = self.assign(len(self.__material))
         self.__avoid = avoid
         self.__assigned_avoid = []
 
@@ -54,7 +55,7 @@ Avoid: {avoid}
 
     @property
     def length(self) -> int:
-        return self.__length
+        return self.__material_length
 
     @property
     def assigned(self) -> list:
@@ -69,7 +70,7 @@ Avoid: {avoid}
         return [pow(2, x) for x in range(length)]
 
     def encode(self, values: list):
-        return [pow(2, self.__original.index(x)) for x in values]
+        return [pow(2, self.__material.index(x)) for x in values]
 
     def decode(self, encoded_list: list):
         return [self.original[int(log2(x))] for x in encoded_list]
