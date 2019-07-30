@@ -15,11 +15,9 @@ class Rgb:
             self.__fake_member.append(self.random_string(5))
         for member in self.__fake_member:
             self.__original.append(member)
-        self.__length = len(self.__original)
-        self.__assigned = [pow(2, x) for x in range(self.__length)]
+        self.__assigned = self.assign(len(self.__original))
         self.__avoid = avoid
         self.__assigned_avoid = []
-        # if
 
     def __str__(self):
         return """
@@ -66,12 +64,15 @@ Avoid: {avoid}
     def avoid(self) -> list:
         return self.__avoid
 
+    @staticmethod
+    def assign(length):
+        return [pow(2, x) for x in range(length)]
+
     def encode(self, values: list):
         return [pow(2, self.__original.index(x)) for x in values]
 
     def decode(self, encoded_list: list):
         return [self.original[int(log2(x))] for x in encoded_list]
-
 
     @staticmethod
     def compress(encoded_list: list):
@@ -103,8 +104,6 @@ Avoid: {avoid}
 
         return [self.decode(group) for group in result]
 
-    # def detect_avoid
-
     @staticmethod
     def random_string(length: int):
         result = ""
@@ -116,4 +115,3 @@ Avoid: {avoid}
     @staticmethod
     def get_random_index(__list=[]):
         return random.randint(0, len(__list) - 1)
-
