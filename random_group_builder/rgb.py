@@ -7,10 +7,10 @@ class Rgb:
 
     def __init__(self, original: list = [], unit: int = 2, avoid=[]):
         self.__unit = unit
-        self.__original = original
-        self.__material = self.__original
-        self.__material_length = len(original)
-        self.__fake_length = (self.__unit - self.__material_length % self.__unit) % self.__unit
+        self.__original = original.copy()
+        self.__original_length = len(self.original)
+        self.__material = self.original.copy()
+        self.__fake_length = (self.unit - self.length % self.unit) % self.__unit
         self.__fake_member = []
         for i in range(self.__fake_length):
             self.__fake_member.append(self.random_string(5))
@@ -18,27 +18,44 @@ class Rgb:
             self.__material.append(member)
         self.__assigned = self.assign(len(self.__material))
         self.__avoid = avoid
-        self.__assigned_avoid = []
+        self.__assigned_avoid = [self.compress(self.encode(x)) for x in self.avoid]
+        self.__material_length = len(self.material)
 
     def __str__(self):
         return """
 ------
 Rgb instance.
+Unit: {unit}
 Original List: {original}
+Material List: {material}
 Assigned: {assigned}
-Length: {length}
+Original Length: {length}
+Material Length: {material_length}
 Fake members: {fake_member}
 Fake length: {fake_length}
 Avoid: {avoid}
+Assigned Avoid: {assigned_avoid}
 -------
         """.format(
+            unit=self.unit,
             original=self.original,
+            material=self.material,
             assigned=self.assigned,
             length=self.length,
+            material_length=self.__material_length,
             fake_member=self.__fake_member,
             fake_length=self.__fake_length,
-            avoid=self.avoid
+            avoid=self.avoid,
+            assigned_avoid=self.__assigned_avoid
         )
+
+    @property
+    def unit(self) -> int:
+        return self.__unit
+
+    @unit.setter
+    def unit(self, value: int):
+        self.__unit = value
 
     @property
     def original(self) -> list:
@@ -54,8 +71,21 @@ Avoid: {avoid}
         del self.__original
 
     @property
+    def material(self) -> list:
+        return self.__material
+
+    @material.setter
+    def material(self, value: list):
+        self.__material = value
+        return
+
+    @material.deleter
+    def material(self):
+        del self.__material
+
+    @property
     def length(self) -> int:
-        return self.__material_length
+        return self.__original_length
 
     @property
     def assigned(self) -> list:
@@ -73,7 +103,7 @@ Avoid: {avoid}
         return [pow(2, self.__material.index(x)) for x in values]
 
     def decode(self, encoded_list: list):
-        return [self.original[int(log2(x))] for x in encoded_list]
+        return [self.material[int(log2(x))] for x in encoded_list]
 
     @staticmethod
     def compress(encoded_list: list):
