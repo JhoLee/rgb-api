@@ -7,19 +7,24 @@ class Rgb:
 
     def __init__(self, original: list = [], unit: int = 2, avoid=[]):
         self.__unit = unit
+
         self.__original = original.copy()
         self.__original_length = len(self.original)
+
         self.__material = self.original.copy()
+
         self.__fake_length = (self.unit - self.length % self.unit) % self.__unit
-        self.__fake_member = []
-        for i in range(self.__fake_length):
-            self.__fake_member.append(self.random_string(5))
+        self.__fake_member = self.get_fake_members(self.__fake_length)
         for member in self.__fake_member:
             self.__material.append(member)
-        self.__assigned = self.assign(len(self.__material))
-        self.__avoid = avoid
-        self.__assigned_avoid = [self.compress(self.encode(x)) for x in self.avoid]
         self.__material_length = len(self.material)
+
+        self.__assigned = self.assign(len(self.__material))
+
+        self.__assigned_fake_member = self.encode(self.__fake_member)
+
+        self.__avoid = avoid
+        self.__compressed_avoid = [self.compress(self.encode(x)) for x in self.avoid]
 
     def __str__(self):
         return """
@@ -46,7 +51,7 @@ Assigned Avoid: {assigned_avoid}
             fake_member=self.__fake_member,
             fake_length=self.__fake_length,
             avoid=self.avoid,
-            assigned_avoid=self.__assigned_avoid
+            assigned_avoid=self.__compressed_avoid
         )
 
     @property
@@ -122,18 +127,32 @@ Assigned Avoid: {assigned_avoid}
         return decompressed
 
     def build(self):
-        material = self.assigned.copy()
+        is_success = False
         result = []
-        while len(material) > 0:
-            print(material)
-            _group = []
-            for i in range(self.__unit):
-                _group.append(material.pop(self.get_random_index(material)))
+        while is_success is not True:
+            material = self.assigned.copy()
+            result = []
+            while len(material) > 0:
+                _group = []
+                for i in range(self.__unit):
+                    _group.append(material.pop(self.get_random_index(material)))
+                result.append(_group)
+            is_success = True
 
-                # todo: Add avoidance validation
-            result.append(_group)
+            print(self.__compressed_avoid)
+            for group in result:
+                print("compress(group) >> {}".format(self.compress(group)))
+                if self.compress(group) in self.__compressed_avoid:
+                    is_success = False
+                    print(group)
 
-        return [self.decode(group) for group in result]
+        _result = [self.decode(group) for group in result]
+        result = []
+        for group in _result:
+            group = [e if e not in self.__fake_member else "" for e in group]
+            result.append(group)
+
+        return result
 
     @staticmethod
     def random_string(length: int):
@@ -142,6 +161,10 @@ Assigned Avoid: {assigned_avoid}
             result += random.choice(string.ascii_lowercase)
 
         return result
+
+    @classmethod
+    def get_fake_members(cls, length):
+        return [cls.random_string(5) for i in range(length)]
 
     @staticmethod
     def get_random_index(__list=[]):
